@@ -53,3 +53,57 @@ npm run test:coverage
 - **Supertest** - HTTP endpoint testing
 - **Sinon** - Mocks, stubs, and spies
 - **Babel** - ES modules transformation for tests
+
+## Deployment
+
+### Heroku
+
+1. **Prerequisites:**
+   - Heroku CLI installed
+   - Git repository initialized
+   - TMDB API credentials
+
+2. **Deploy Steps:**
+   ```bash
+   # Login to Heroku
+   heroku login
+
+   # Create Heroku app
+   heroku create your-app-name
+
+   # Set environment variables
+   heroku config:set VITE_TMDB_API_KEY=your_api_key
+   heroku config:set VITE_TMDB_READ_ACCESS_TOKEN=your_token
+   heroku config:set CORS=https://your-frontend-domain.vercel.app
+   heroku config:set NODE_ENV=production
+
+   # Deploy
+   git push heroku main
+   ```
+
+3. **Environment Variables:**
+   - `VITE_TMDB_API_KEY` - Your TMDB API key
+   - `VITE_TMDB_READ_ACCESS_TOKEN` - Your TMDB read access token
+   - `CORS` - Frontend domain for CORS (e.g., `https://your-app.vercel.app`)
+   - `NODE_ENV` - Set to `production`
+   - `PORT` - Automatically set by Heroku
+
+### API Endpoints
+
+- `GET /` - Health check
+- `GET /api/movies/search?q={query}&page={page}` - Search movies
+- `GET /api/movies/popular?page={page}` - Get popular movies
+- `GET /api/movies/top-rated?page={page}` - Get top rated movies
+- `GET /api/movies/now-playing?page={page}` - Get now playing movies
+- `GET /api/movies/{id}` - Get movie details
+- `GET /api-docs` - Swagger documentation
+
+### Technologies Used
+
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **TMDB API** - Movie database
+- **Swagger/OpenAPI** - API documentation
+- **CORS** - Cross-origin resource sharing
+- **Jest** - Testing framework
+- **ES Modules** - Modern JavaScript modules
