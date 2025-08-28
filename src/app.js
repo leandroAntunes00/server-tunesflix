@@ -1,7 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+
+// Routes
+import homeRoutes from './routes/home.js';
+import movieRoutes from './routes/movies.js';
+
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+
 
 const app = express();
 
@@ -101,9 +107,7 @@ app.use(express.json());
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
-import homeRoutes from './routes/home.js';
-import movieRoutes from './routes/movies.js';
+
 
 app.use('/', homeRoutes);
 app.use('/api/movies', movieRoutes);

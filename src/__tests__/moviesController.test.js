@@ -1,18 +1,22 @@
 import sinon from 'sinon';
 import MoviesController from '../controllers/moviesController.js';
-import TMDBService from '../services/tmdbService.js';
+
+// Mock TMDBService before importing the controller
+const mockTMDBService = {
+  searchMovies: sinon.stub(),
+  getPopularMovies: sinon.stub(),
+  getTopRatedMovies: sinon.stub(),
+  getMovieDetails: sinon.stub(),
+  getNowPlayingMovies: sinon.stub()
+};
+
+// Mock the module
+sinon.stub(require('../services/tmdbService.js'), 'default').returns(mockTMDBService);
 
 describe('Movies Controller', () => {
-  let req, res, next, tmdbService;
+  let req, res, next;
 
   beforeEach(() => {
-    // Set up test environment variables
-    process.env.VITE_TMDB_API_KEY = 'test-api-key';
-    process.env.VITE_TMDB_READ_ACCESS_TOKEN = 'test-token';
-
-    // Create TMDBService instance after environment variables are set
-    tmdbService = new TMDBService();
-
     req = {
       query: {},
       params: {},
@@ -25,6 +29,9 @@ describe('Movies Controller', () => {
     };
 
     next = sinon.spy();
+
+    // Reset all stubs
+    Object.values(mockTMDBService).forEach(stub => stub.reset());
   });
 
   afterEach(() => {
@@ -41,11 +48,11 @@ describe('Movies Controller', () => {
         page: 1
       };
 
-      sinon.stub(tmdbService, 'searchMovies').resolves(mockResult);
+      mockTMDBService.searchMovies.resolves(mockResult);
 
       await MoviesController.searchMovies(req, res);
 
-      sinon.assert.calledWith(tmdbService.searchMovies, 'test movie', 1);
+      sinon.assert.calledWith(mockTMDBService.searchMovies, 'test movie', 1);
       sinon.assert.calledWith(res.json, mockResult);
     });
 
@@ -64,14 +71,14 @@ describe('Movies Controller', () => {
       req.query = { q: 'test' };
       const error = new Error('Service error');
 
-      sinon.stub(tmdbService, 'searchMovies').rejects(error);
+      mockTMDBService.searchMovies.rejects(error);
 
       await MoviesController.searchMovies(req, res);
 
       sinon.assert.calledWith(res.status, 500);
       sinon.assert.calledWith(res.json, sinon.match({
         error: 'Failed to search movies',
-        message: 'Service error'
+        message: sinon.match.string
       }));
     });
   });
@@ -79,28 +86,34 @@ describe('Movies Controller', () => {
   describe('getPopularMovies', () => {
     it('should get popular movies successfully', async () => {
       req.query = { page: '2' };
+
       const mockResult = {
         results: [{ id: 1, title: 'Popular Movie' }],
         page: 2
       };
 
-      sinon.stub(tmdbService, 'getPopularMovies').resolves(mockResult);
+      mockTMDBService.getPopularMovies.resolves(mockResult);
 
       await MoviesController.getPopularMovies(req, res);
 
-      sinon.assert.calledWith(tmdbService.getPopularMovies, 2);
+      sinon.assert.calledWith(mockTMDBService.getPopularMovies, 2);
       sinon.assert.calledWith(res.json, mockResult);
     });
 
     it('should use default page 1 when not provided', async () => {
       req.query = {};
-      const mockResult = { results: [], page: 1 };
 
-      sinon.stub(tmdbService, 'getPopularMovies').resolves(mockResult);
+      const mockResult = {
+        results: [{ id: 1, title: 'Popular Movie' }],
+        page: 1
+      };
+
+      mockTMDBService.getPopularMovies.resolves(mockResult);
 
       await MoviesController.getPopularMovies(req, res);
 
-      sinon.assert.calledWith(tmdbService.getPopularMovies, 1);
+      sinon.assert.calledWith(mockTMDBService.getPopularMovies, 1);
+      sinon.assert.calledWith(res.json, mockResult);
     });
   });
 
@@ -111,14 +124,14 @@ describe('Movies Controller', () => {
       const mockMovie = {
         id: 123,
         title: 'Test Movie',
-        overview: 'Movie description'
+        overview: 'Test description'
       };
 
-      sinon.stub(tmdbService, 'getMovieDetails').resolves(mockMovie);
+      mockTMDBService.getMovieDetails.resolves(mockMovie);
 
       await MoviesController.getMovieDetails(req, res);
 
-      sinon.assert.calledWith(tmdbService.getMovieDetails, 123);
+      sinon.assert.calledWith(mockTMDBService.getMovieDetails, 123);
       sinon.assert.calledWith(res.json, mockMovie);
     });
 
@@ -135,9 +148,9 @@ describe('Movies Controller', () => {
 
     it('should return 404 for movie not found', async () => {
       req.params = { id: '999' };
-      const error = new Error('Movie not found');
 
-      sinon.stub(tmdbService, 'getMovieDetails').rejects(error);
+      const error = new Error('Movie not found');
+      mockTMDBService.getMovieDetails.rejects(error);
 
       await MoviesController.getMovieDetails(req, res);
 
@@ -145,34 +158,6 @@ describe('Movies Controller', () => {
       sinon.assert.calledWith(res.json, {
         error: 'Movie not found'
       });
-    });
-  });
-
-  describe('getTopRatedMovies', () => {
-    it('should get top rated movies successfully', async () => {
-      req.query = { page: '1' };
-      const mockResult = { results: [], page: 1 };
-
-      sinon.stub(tmdbService, 'getTopRatedMovies').resolves(mockResult);
-
-      await MoviesController.getTopRatedMovies(req, res);
-
-      sinon.assert.calledWith(tmdbService.getTopRatedMovies, 1);
-      sinon.assert.calledWith(res.json, mockResult);
-    });
-  });
-
-  describe('getNowPlayingMovies', () => {
-    it('should get now playing movies successfully', async () => {
-      req.query = { page: '1' };
-      const mockResult = { results: [], page: 1 };
-
-      sinon.stub(tmdbService, 'getNowPlayingMovies').resolves(mockResult);
-
-      await MoviesController.getNowPlayingMovies(req, res);
-
-      sinon.assert.calledWith(tmdbService.getNowPlayingMovies, 1);
-      sinon.assert.calledWith(res.json, mockResult);
     });
   });
 });

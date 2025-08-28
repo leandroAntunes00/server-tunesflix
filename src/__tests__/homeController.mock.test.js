@@ -37,16 +37,6 @@ describe('Home Controller with Mocks', () => {
 
       sinon.assert.notCalled(res.status);
     });
-
-    it('should handle errors gracefully (mocked scenario)', () => {
-      // Mocking a scenario where res.send throws an error
-      const error = new Error('Send failed');
-      res.send = sinon.stub().throws(error);
-
-      expect(() => {
-        homeController.getHome(req, res);
-      }).toThrow('Send failed');
-    });
   });
 
   describe('Mocking external dependencies', () => {

@@ -5,17 +5,24 @@ process.env.NODE_ENV = 'test';
 process.env.PORT = '3000';
 process.env.CORS = 'http://localhost:3000';
 
-import request from 'supertest';
+// Mock TMDBService before importing app
 import sinon from 'sinon';
+const mockTMDBService = {
+  searchMovies: sinon.stub(),
+  getPopularMovies: sinon.stub(),
+  getTopRatedMovies: sinon.stub(),
+  getMovieDetails: sinon.stub(),
+  getNowPlayingMovies: sinon.stub()
+};
+sinon.stub(require('../services/tmdbService.js'), 'default').returns(mockTMDBService);
+
+import request from 'supertest';
 import app from '../app.js';
-import TMDBService from '../services/tmdbService.js';
 
 describe('Movies API Integration Tests', () => {
-  let tmdbService;
-
   beforeEach(() => {
-    // Create TMDBService instance after environment variables are set
-    tmdbService = new TMDBService();
+    // Reset all stubs
+    Object.values(mockTMDBService).forEach(stub => stub.reset());
   });
 
   afterEach(() => {
@@ -38,14 +45,14 @@ describe('Movies API Integration Tests', () => {
         total_pages: 1
       };
 
-      sinon.stub(tmdbService, 'searchMovies').resolves(mockSearchResult);
+      mockTMDBService.searchMovies.resolves(mockSearchResult);
 
       const response = await request(app)
         .get('/api/movies/search?q=test&page=1')
         .expect(200);
 
       expect(response.body).toEqual(mockSearchResult);
-      sinon.assert.calledWith(tmdbService.searchMovies, 'test', 1);
+      sinon.assert.calledWith(mockTMDBService.searchMovies, 'test', 1);
     });
 
     it('should return 400 when query is missing', async () => {
@@ -74,7 +81,7 @@ describe('Movies API Integration Tests', () => {
         total_pages: 1
       };
 
-      sinon.stub(tmdbService, 'getPopularMovies').resolves(mockPopularResult);
+      mockTMDBService.getPopularMovies.resolves(mockPopularResult);
 
       const response = await request(app)
         .get('/api/movies/popular?page=1')
@@ -99,7 +106,7 @@ describe('Movies API Integration Tests', () => {
         total_pages: 1
       };
 
-      sinon.stub(tmdbService, 'getTopRatedMovies').resolves(mockTopRatedResult);
+      mockTMDBService.getTopRatedMovies.resolves(mockTopRatedResult);
 
       const response = await request(app)
         .get('/api/movies/top-rated?page=1')
@@ -124,7 +131,7 @@ describe('Movies API Integration Tests', () => {
         total_pages: 1
       };
 
-      sinon.stub(tmdbService, 'getNowPlayingMovies').resolves(mockNowPlayingResult);
+      mockTMDBService.getNowPlayingMovies.resolves(mockNowPlayingResult);
 
       const response = await request(app)
         .get('/api/movies/now-playing?page=1')
@@ -143,7 +150,7 @@ describe('Movies API Integration Tests', () => {
         poster_path: '/details.jpg'
       };
 
-      sinon.stub(tmdbService, 'getMovieDetails').resolves(mockMovieDetails);
+      mockTMDBService.getMovieDetails.resolves(mockMovieDetails);
 
       const response = await request(app)
         .get('/api/movies/123')

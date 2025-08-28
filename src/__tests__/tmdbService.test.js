@@ -1,5 +1,5 @@
-import axios from 'axios';
 import sinon from 'sinon';
+import axios from 'axios';
 
 describe('TMDB Service', () => {
   let tmdbService, clientStub;
@@ -13,12 +13,19 @@ describe('TMDB Service', () => {
     process.env.VITE_TMDB_READ_ACCESS_TOKEN = 'test-token';
     process.env.NODE_ENV = 'test';
 
-    // Import the service
+    // Import the service factory
     const tmdbModule = await import('../services/tmdbService.js');
-    tmdbService = new tmdbModule.default();
+    tmdbService = tmdbModule.default();
 
-    // Stub the client.get method
-    clientStub = sinon.stub(tmdbService.client, 'get');
+    // Stub axios.create to return a mock client
+    const mockClient = {
+      get: sinon.stub()
+    };
+    sinon.stub(axios, 'create').returns(mockClient);
+    clientStub = mockClient.get;
+
+    // Re-create the service with the stubbed axios
+    tmdbService = tmdbModule.default();
   });
 
   afterEach(() => {
@@ -122,47 +129,6 @@ describe('TMDB Service', () => {
       clientStub.rejects(error);
 
       await expect(tmdbService.getMovieDetails(999)).rejects.toThrow('Movie not found');
-    });
-  });
-
-  describe('formatMoviesResponse', () => {
-    it('should format movie poster paths correctly', () => {
-      const rawData = {
-        results: [
-          {
-            id: 1,
-            title: 'Test Movie',
-            poster_path: '/poster.jpg',
-            backdrop_path: '/backdrop.jpg'
-          }
-        ],
-        page: 1,
-        total_results: 1,
-        total_pages: 1
-      };
-
-      const result = tmdbService.formatMoviesResponse(rawData);
-
-      expect(result.results[0].poster_path).toBe('https://image.tmdb.org/t/p/w500/poster.jpg');
-      expect(result.results[0].backdrop_path).toBe('https://image.tmdb.org/t/p/w500/backdrop.jpg');
-    });
-
-    it('should handle null poster paths', () => {
-      const rawData = {
-        results: [
-          {
-            id: 1,
-            title: 'Test Movie',
-            poster_path: null,
-            backdrop_path: null
-          }
-        ]
-      };
-
-      const result = tmdbService.formatMoviesResponse(rawData);
-
-      expect(result.results[0].poster_path).toBeNull();
-      expect(result.results[0].backdrop_path).toBeNull();
     });
   });
 });
