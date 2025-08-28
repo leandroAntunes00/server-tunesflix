@@ -55,27 +55,6 @@ const swaggerOptions = {
             }
           }
         },
-        Favorite: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              description: 'Favorite ID'
-            },
-            movieId: {
-              type: 'integer',
-              description: 'TMDB movie ID'
-            },
-            title: {
-              type: 'string',
-              description: 'Movie title'
-            },
-            poster_path: {
-              type: 'string',
-              description: 'Poster image URL'
-            }
-          }
-        },
         Error: {
           type: 'object',
           properties: {
@@ -105,7 +84,7 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS || 'http://localhost:3000',
+  origin: process.env.CORS || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());

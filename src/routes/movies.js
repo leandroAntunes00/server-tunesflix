@@ -108,11 +108,6 @@ router.get('/now-playing', MoviesController.getNowPlayingMovies);
  *         schema:
  *           type: integer
  *         description: Movie ID
- *       - in: header
- *         name: x-user-id
- *         schema:
- *           type: string
- *         description: User ID for favorite status
  *     responses:
  *       200:
  *         description: Movie details
