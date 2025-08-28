@@ -16,8 +16,12 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server',
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://back-tunesflix-4a935ae8a58f.herokuapp.com'
+          : 'http://localhost:3000',
+        description: process.env.NODE_ENV === 'production' 
+          ? 'Production server'
+          : 'Development server',
       },
       {
         url: `http://localhost:${process.env.PORT || 3000}`,
