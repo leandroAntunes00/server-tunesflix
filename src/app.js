@@ -83,10 +83,10 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS || 'http://localhost:5173',
-  credentials: true
-}));
+// app.use(cors({
+//   origin: process.env.CORS || 'http://localhost:5173',
+//   credentials: true
+// }));
 app.use(express.json());
 
 // Swagger UI
