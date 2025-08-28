@@ -14,7 +14,10 @@ const mockTMDBService = {
   getMovieDetails: sinon.stub(),
   getNowPlayingMovies: sinon.stub()
 };
-sinon.stub(require('../services/tmdbService.js'), 'default').returns(mockTMDBService);
+jest.mock('../services/tmdbService.js', () => ({
+  __esModule: true,
+  default: () => mockTMDBService
+}));
 
 import request from 'supertest';
 import app from '../app.js';

@@ -1,5 +1,4 @@
 import sinon from 'sinon';
-import MoviesController from '../controllers/moviesController.js';
 
 // Mock TMDBService before importing the controller
 const mockTMDBService = {
@@ -9,9 +8,12 @@ const mockTMDBService = {
   getMovieDetails: sinon.stub(),
   getNowPlayingMovies: sinon.stub()
 };
+jest.mock('../services/tmdbService.js', () => ({
+  __esModule: true,
+  default: () => mockTMDBService
+}));
 
-// Mock the module
-sinon.stub(require('../services/tmdbService.js'), 'default').returns(mockTMDBService);
+import MoviesController from '../controllers/moviesController.js';
 
 describe('Movies Controller', () => {
   let req, res, next;
