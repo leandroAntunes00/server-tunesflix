@@ -88,7 +88,12 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS || '*',
+  origin: [
+    'https://tunesflix.vercel.app',
+    'https://back-tunesflix-4a935ae8a58f.herokuapp.com',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
   credentials: true
 }));
 app.use(express.json());
