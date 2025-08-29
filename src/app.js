@@ -96,9 +96,7 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use(cors({
   origin: [
     'https://tunesflix.vercel.app',
-    'https://back-tunesflix-4a935ae8a58f.herokuapp.com',
-    'http://localhost:3000',
-    'http://localhost:5173'
+    'https://back-tunesflix-4a935ae8a58f.herokuapp.com'
   ],
   credentials: true
 }));
